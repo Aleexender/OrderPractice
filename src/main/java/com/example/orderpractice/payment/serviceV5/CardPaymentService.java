@@ -1,20 +1,23 @@
-package com.example.orderpractice.payment.serviceV4;
+package com.example.orderpractice.payment.serviceV5;
 
 import com.example.orderpractice.payment.domain.Payment;
 import com.example.orderpractice.payment.domain.PaymentInfo;
 import com.example.orderpractice.payment.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-@Service("DEFAULT")
-public class DefaultPaymentService extends PaymentService {
+@Service("CARD")
+@Transactional
+class CardPaymentService extends PaymentService {
 
-    public DefaultPaymentService(PaymentRepository paymentRepository) {
+    public CardPaymentService(PaymentRepository paymentRepository) {
         super(paymentRepository);
     }
 
     @Override
     public Payment init(Long orderId, int price) {
-        return null;
+        var paymentInfo = new PaymentInfo("정훈", "하나은행", "1231");
+        return paymentRepository.save(Payment.card(orderId, price, paymentInfo));
     }
 
     @Override

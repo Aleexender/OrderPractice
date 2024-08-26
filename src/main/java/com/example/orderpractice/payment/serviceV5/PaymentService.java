@@ -1,5 +1,6 @@
-package com.example.orderpractice.payment.serviceV4;
+package com.example.orderpractice.payment.serviceV5;
 
+import com.example.orderpractice.event.PaymentEvent;
 import com.example.orderpractice.payment.domain.Payment;
 import com.example.orderpractice.payment.domain.PaymentInfo;
 import com.example.orderpractice.payment.repository.PaymentRepository;
@@ -13,8 +14,13 @@ public abstract class PaymentService {
 
     protected abstract boolean invoke(PaymentInfo paymentInfo, int price);
 
-    public boolean pay(Long orderId, int price) {
+    public PaymentEvent pay(Long orderId, int price) {
         var payment = init(orderId, price);
-        return invoke(payment.getPaymentInfo(), price);
+
+        var success = invoke(payment.getPaymentInfo(), price);
+
+        payment.payed(success);
+
+        return success ? PaymentEvent.success(orderId) : PaymentEvent.fail(orderId);
     }
 }

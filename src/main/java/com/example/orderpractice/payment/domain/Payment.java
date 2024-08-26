@@ -1,6 +1,7 @@
 package com.example.orderpractice.payment.domain;
 
 import com.example.orderpractice.order.domain.BaseEntity;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,7 +20,7 @@ public class Payment extends BaseEntity {
 
     private int price;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = PaymentStatusConverter.class)
     private Status status;
 
     @Enumerated(EnumType.STRING)
@@ -29,20 +30,19 @@ public class Payment extends BaseEntity {
     private PaymentInfo paymentInfo;
 
     public static Payment card(Long orderId, int price, PaymentInfo paymentInfo) {
-        return new Payment(orderId,price,Status.PAYMENT_REQUESTED, Method.CARD, paymentInfo);
+        return new Payment(orderId,price, new Requested(), Method.CARD, paymentInfo);
     }
 
     public static Payment cash(Long orderId, int price, PaymentInfo paymentInfo) {
-        return new Payment(orderId, price, Status.PAYMENT_REQUESTED, Method.CASH, paymentInfo);
+        return new Payment(orderId, price, new Requested(), Method.CASH, paymentInfo);
     }
 
     public String getName() {
         return paymentInfo.getName();
     }
 
-    public enum Status {
-        PAYMENT_REQUESTED,
-        PAYMENT_COMPLETE;
+    public void payed(boolean success) {
+        this.status = success ? status.success() : status.fail();
     }
 
     public enum Method {

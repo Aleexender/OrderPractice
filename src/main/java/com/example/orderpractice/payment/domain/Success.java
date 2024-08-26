@@ -1,4 +1,4 @@
-package com.example.orderpractice.paymentv5.domain;
+package com.example.orderpractice.payment.domain;
 
 public class Success implements Status {
     private static final String ALREADY_PAYED = "이미 처리된 건입니다.";

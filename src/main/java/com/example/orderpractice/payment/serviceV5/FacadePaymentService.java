@@ -1,4 +1,4 @@
-package com.example.orderpractice.payment.serviceV4;
+package com.example.orderpractice.payment.serviceV5;
 
 import com.example.orderpractice.event.OrderEvent;
 import com.example.orderpractice.event.PaymentFailEvent;
@@ -22,16 +22,10 @@ public class FacadePaymentService { // 우리 애플리케이션 내부에서 �
 
     @TransactionalEventListener
     public void orderRequested(OrderEvent orderEvent) {
-        var method = Payment.Method.valueOf(orderEvent.paymentMethod());
+        var paymentService = paymentServiceFactory.get(orderEvent.paymentMethod());
 
-        var paymentService = paymentServiceFactory.get(method);
+        var paymentEvent = paymentService.pay(orderEvent.orderId(), orderEvent.price());
 
-        var success = paymentService.pay(orderEvent.orderId(), orderEvent.price());
-
-        var event = success
-            ? new PaymentSuccessEvent(orderEvent.orderId())
-            : new PaymentFailEvent(orderEvent.orderId());
-
-        applicationEventPublisher.publishEvent(event);
+        applicationEventPublisher.publishEvent(paymentEvent);
     }
 }

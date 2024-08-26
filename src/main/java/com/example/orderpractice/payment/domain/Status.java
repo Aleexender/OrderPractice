@@ -1,4 +1,4 @@
-package com.example.orderpractice.paymentv5.domain;
+package com.example.orderpractice.payment.domain;
 
 public interface Status {
     String name();

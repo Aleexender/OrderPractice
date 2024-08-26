@@ -1,4 +1,4 @@
-package com.example.orderpractice.paymentv5.domain;
+package com.example.orderpractice.payment.domain;
 
 public class Failed implements Status {
     private static final String ALREADY_FAILED = "이미 실패된 건입니다.";
