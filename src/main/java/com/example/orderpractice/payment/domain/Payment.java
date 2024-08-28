@@ -1,11 +1,11 @@
 package com.example.orderpractice.payment.domain;
 
 import com.example.orderpractice.order.domain.BaseEntity;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,8 +20,11 @@ public class Payment extends BaseEntity {
 
     private int price;
 
-    @Convert(converter = PaymentStatusConverter.class)
-    private Status status;
+    @Enumerated(EnumType.STRING)
+    private Payment.Status status;
+
+    @Transient
+    private com.example.orderpractice.payment.domain.Status state;
 
     @Enumerated(EnumType.STRING)
     private Method paymentMethod;
@@ -30,11 +33,11 @@ public class Payment extends BaseEntity {
     private PaymentInfo paymentInfo;
 
     public static Payment card(Long orderId, int price, PaymentInfo paymentInfo) {
-        return new Payment(orderId,price, new Requested(), Method.CARD, paymentInfo);
+        return new Payment(orderId,price, Status.REQUESTED,new Requested(), Method.CARD, paymentInfo);
     }
 
     public static Payment cash(Long orderId, int price, PaymentInfo paymentInfo) {
-        return new Payment(orderId, price, new Requested(), Method.CASH, paymentInfo);
+        return new Payment(orderId, price, Status.REQUESTED, new Requested(), Method.CASH, paymentInfo);
     }
 
     public String getName() {
@@ -42,7 +45,22 @@ public class Payment extends BaseEntity {
     }
 
     public void payed(boolean success) {
-        this.status = success ? status.success() : status.fail();
+        if (state == null) {
+            state = switch (this.status) {
+                case FAILED -> new Failed();
+                case SUCCESS -> new Success();
+                case REQUESTED -> new Requested();
+            };
+        }
+
+        this.state = success ? state.success() : state.fail();
+    }
+
+    public enum Status {
+        FAILED,
+        REQUESTED,
+        SUCCESS,
+        ;
     }
 
     public enum Method {
